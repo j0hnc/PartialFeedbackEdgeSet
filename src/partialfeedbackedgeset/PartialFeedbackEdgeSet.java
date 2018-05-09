@@ -5,12 +5,10 @@ import java.util.Scanner;
 import java.util.Stack;
 
 /**
- * Ingenieria de Sistemas y Computacion
- * Algoritmos y Complejidad
- * Profesor: Ing. Capacho
- * Programa: Partial Feedback Edge Set
- * Nombre: Jhon Jairo Cerpa Jimenez
+ * Ingenieria de Sistemas y Computacion Algoritmos y Complejidad Profesor: Ing.
+ * Capacho Programa: Partial Feedback Edge Set Nombre: Jhon Jairo Cerpa Jimenez
  * Codigo: 200090143
+ *
  * @author John
  */
 public class PartialFeedbackEdgeSet {
@@ -99,12 +97,17 @@ public class PartialFeedbackEdgeSet {
         Stack<Movimiento> pila = new Stack<>();
         Movimiento actual = new Movimiento(nodoInicial, 0);
         pila.add(actual);
+        System.out.println("Nodo Inicial: " + nodoInicial);
 
         // Mientras haya movimientos posibles
         int i = 0;
         int nodoSig = 0; // Nodo sig. a intentar
         while (!pila.isEmpty()) {
+            
+            // Si el mov. es valido y el nodo siguiente es el Inicial es un circuito, agregar.
+            System.out.println("\nNodo actual: " + actual.verticeActual);
             if (i > 0 && actual.verticeActual == nodoInicial) {
+                System.out.println("Se encontro un circuito.");
                 if (circuito.size() <= L) {
                     ArrayList<Arista> copiaCircuito = new ArrayList<>(circuito);
                     circuitos.add(copiaCircuito);
@@ -115,23 +118,26 @@ public class PartialFeedbackEdgeSet {
                 pila.add(actual);
                 circuito.clear();
             }
+
             if (actual.vMov < ady.length) { // Si tiene mas movs. posibles
                 int sigVertice = ady[actual.vMov];
-                Movimiento temp = new Movimiento(sigVertice, 0); // Deberia pasar su i
+                Movimiento temp = new Movimiento(sigVertice, 0);
+                System.out.println("Pila: ");
+                for (Movimiento s : pila) {
+                    System.out.print(s.verticeActual + ", " + listaAdy.get(s.verticeActual)[s.vMov]);
+                }
+                System.out.println("Siguiente Vertice: " + sigVertice);
                 if (movimientoValido(actual, temp, pila, listaAdy)) {
-                    //System.out.println("Movimiento valido");
+                    System.out.println("Movimiento valido");
                     circuito.add(new Arista(actual.verticeActual, temp.verticeActual));
                     ady = listaAdy.get(sigVertice); // Se obtienen los adyacentes del siguiente.
                     actual = temp;
                     pila.add(actual);
-                    // Si el mov. es valido y el nodo siguiente es el Inicial es un circuito, agregar.
-                    if (actual.verticeActual == nodoInicial) {
-                        circuitos.add(circuito);
-                    }
                 } else { // Intentar siguiente arista, sin bactracking                    
                     actual.vMov += 1;
                 }
             } else {
+                System.out.println("Se quedo sin movimientos");
                 // backtracking, no tiene mas aristas/adyacentes
                 actual = pila.pop();
                 ady = listaAdy.get(actual.verticeActual);
@@ -153,7 +159,6 @@ public class PartialFeedbackEdgeSet {
         int anterior = -1;
         for (Movimiento m : pila) {
             if (i == pila.size() - 1 && pila.size() >= 2 && sigVertice == anterior) {
-                //System.out.println("Movimiento invalido");
                 return false;
             }
             i++;
@@ -202,7 +207,9 @@ public class PartialFeedbackEdgeSet {
                     }
                 }
                 // Se comprueba que tenga por lo menos una arista en todos los circuitos
-                if (cont == numCircuitos) return subgrafo;
+                if (cont == numCircuitos) {
+                    return subgrafo;
+                }
             }
         }
         return null;
@@ -212,27 +219,28 @@ public class PartialFeedbackEdgeSet {
 
         ArrayList<int[]> grafo = new ArrayList<>();
 
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Digite K: ");
-        int K = sc.nextInt();
-        System.out.print("Digite L: ");
-        int L = sc.nextInt();
-
-        /*int[] l0 = {1, 4};
-        int[] l1 = {0, 4, 3, 2};
-        int[] l2 = {1, 3};
-        int[] l3 = {1, 4, 2};
-        int[] l4 = {3, 0, 1};*/
+        int K = 4;
+        int L = 4;
+        System.out.println("Con K = " + K + " y L = " + L);
+        
+        // Con 4 nodos
         int[] l0 = {1, 3};
         int[] l1 = {0, 2};
         int[] l2 = {1, 3};
         int[] l3 = {0, 2};
 
+        // Con 5 nodos *** Remover comentarios ***
+//        int[] l0 = {1, 4};
+//        int[] l1 = {0, 4, 3, 2};
+//        int[] l2 = {1, 3};
+//        int[] l3 = {1, 2, 4};
+//        int[] l4 = {0, 1, 3};
+
         grafo.add(l0);
         grafo.add(l1);
         grafo.add(l2);
         grafo.add(l3);
-        //grafo.add(l4);
+//        grafo.add(l4);
 
         System.out.println("\nSubgrafos: ");
         ArrayList<ArrayList<Arista>> subgrafos = buscarSubgrafos(grafo, K);
