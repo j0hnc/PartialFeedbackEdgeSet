@@ -189,14 +189,11 @@ public class PartialFeedbackEdgeSet {
                 j++;
             }
         }
-
         return true;
     }
 
     public static void main(String[] args) {
-
         System.out.println("Working on it...");
-
         ArrayList<int[]> grafo = new ArrayList<>();
 
         int[] l0 = {1, 4};
@@ -215,9 +212,7 @@ public class PartialFeedbackEdgeSet {
         mostrarLista(buscarSubgrafos(grafo, 3));
         System.out.println("\nCircuitos: ");
         buscarCircuitos(grafo, 4);
-
         System.out.println("Done!");
-
     }
 
 }
