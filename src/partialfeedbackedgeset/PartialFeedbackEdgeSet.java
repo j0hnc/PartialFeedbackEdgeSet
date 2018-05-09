@@ -1,27 +1,30 @@
 package partialfeedbackedgeset;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Scanner;
 import java.util.Stack;
 
 /**
- *
+ * Ingenieria de Sistemas y Computacion
+ * Algoritmos y Complejidad
+ * Profesor: Ing. Capacho
+ * Programa: Partial Feedback Edge Set
+ * Nombre: Jhon Jairo Cerpa Jimenez
+ * Codigo: 200090143
  * @author John
  */
 public class PartialFeedbackEdgeSet {
 
     public static ArrayList<ArrayList<Arista>> buscarSubgrafos(ArrayList<int[]> listaAdyacencia, int K) {
         ArrayList<ArrayList<Arista>> listaSubgrafos = new ArrayList<>();
-
         int numVertice = 0;
-
         for (int[] vertice : listaAdyacencia) {
             ArrayList<Arista> subgrafo = new ArrayList<>();
             for (int i = 0; i < vertice.length; i++) {
                 // Agregando (1,0) ... (1,0) (1,4) ... (1,0) (1,4) (1,3)
                 subgrafo.add(new Arista(numVertice, vertice[i]));
                 ArrayList<Arista> temp = new ArrayList<>(subgrafo);
-                if (temp.size() == K) {
+                if (temp.size() <= K) {
                     listaSubgrafos.add(temp);
                 }
                 // Agregando (1,0) ... (1,4) ... (1,3)
@@ -48,7 +51,6 @@ public class PartialFeedbackEdgeSet {
                 listaSubgrafos.add(nuevaLista);
             }
         }
-
         return listaSubgrafos;
     }
 
@@ -81,44 +83,43 @@ public class PartialFeedbackEdgeSet {
         }
     }
 
-    public static void buscarCircuitos(ArrayList<int[]> listaAdyacencia, int L) {
+    // Agrega circuitos encontrados desde cada vertice
+    public static ArrayList<ArrayList<Arista>> buscarCircuitos(ArrayList<int[]> listaAdyacencia, int L) {
         ArrayList<ArrayList<Arista>> circuitos = new ArrayList<>();
-        // Agregar circuitos encontrados desde cada vertice.
         for (int i = 0; i < listaAdyacencia.size(); i++) {
-            circuitos.addAll(buscarCircuitosVertice(listaAdyacencia, i));
+            circuitos.addAll(buscarCircuitosVertice(listaAdyacencia, i, L));
         }
-        mostrarLista(circuitos);
+        return circuitos;
     }
 
-    public static ArrayList<ArrayList<Arista>> buscarCircuitosVertice(ArrayList<int[]> listaAdy, int nodoInicial) {
-
+    public static ArrayList<ArrayList<Arista>> buscarCircuitosVertice(ArrayList<int[]> listaAdy, int nodoInicial, int L) {
         ArrayList<ArrayList<Arista>> circuitos = new ArrayList<>();
         ArrayList<Arista> circuito = new ArrayList<>();
-        int[] ady = listaAdy.get(nodoInicial);
-        //System.out.println("Adyacencia Nodo " + nodoInicial + " " + Arrays.toString(ady));
-
-        Stack<Movimiento> pila = new Stack<>(); // Pila para bactracking
+        int[] ady = listaAdy.get(nodoInicial); // Lista adyacencia del nodo actual
+        Stack<Movimiento> pila = new Stack<>();
         Movimiento actual = new Movimiento(nodoInicial, 0);
-        pila.add(actual); // Con esto se puede conocer el vertice v de (u,v)
+        pila.add(actual);
 
-        // 0: 1, 4
-        // 1: 0, 2, 3, 4
-        // 2: 1, 3
-        // 3: 1, 2, 4
-        // 4: 1, 3, 0
         // Mientras haya movimientos posibles
         int i = 0;
+        int nodoSig = 0; // Nodo sig. a intentar
         while (!pila.isEmpty()) {
-            System.out.println("Nodo: " + actual.verticeActual + ", Movimiento i: " + actual.vMov);
             if (i > 0 && actual.verticeActual == nodoInicial) {
-                circuitos.add(circuito);
+                if (circuito.size() <= L) {
+                    ArrayList<Arista> copiaCircuito = new ArrayList<>(circuito);
+                    circuitos.add(copiaCircuito);
+                }
+                nodoSig++; // Se intenta con otro nodo.
+                actual = new Movimiento(nodoInicial, nodoSig);
+                pila.clear();
+                pila.add(actual);
+                circuito.clear();
             }
             if (actual.vMov < ady.length) { // Si tiene mas movs. posibles
                 int sigVertice = ady[actual.vMov];
-                System.out.println("Siguiente vertice: " + sigVertice);
                 Movimiento temp = new Movimiento(sigVertice, 0); // Deberia pasar su i
                 if (movimientoValido(actual, temp, pila, listaAdy)) {
-                    System.out.println("Movimiento valido");
+                    //System.out.println("Movimiento valido");
                     circuito.add(new Arista(actual.verticeActual, temp.verticeActual));
                     ady = listaAdy.get(sigVertice); // Se obtienen los adyacentes del siguiente.
                     actual = temp;
@@ -139,14 +140,10 @@ public class PartialFeedbackEdgeSet {
             i++;
         }
 
-        if (circuitos.isEmpty()) {
-            System.out.println("No se encontraron circuitos");
-        }
         return circuitos;
     }
 
     public static Boolean movimientoValido(Movimiento actual, Movimiento temp, Stack<Movimiento> pila, ArrayList<int[]> listaAdy) {
-
         /* 
             Verifica que no se regrese: (1,0) no regresar a (0,1)
             Se revisa el siguiente principal de la pila
@@ -155,18 +152,14 @@ public class PartialFeedbackEdgeSet {
         int i = 0;
         int anterior = -1;
         for (Movimiento m : pila) {
-            //System.out.println("i: " + i);
-            //System.out.println("pilaActual: " + m.verticeActual + " Vertice al que sigue " + listaAdy.get(m.verticeActual)[m.vMov]);
-            //System.out.println("Anterior: " + anterior);
-            //System.out.println("PilaSize: " + pila.size());
             if (i == pila.size() - 1 && pila.size() >= 2 && sigVertice == anterior) {
-                System.out.println("Movimiento invalido");
+                //System.out.println("Movimiento invalido");
                 return false;
             }
             i++;
             anterior = m.verticeActual;
         }
-        // Para que no repita aristas, (u,v) == (v,u)
+        // Para que no repita aristas, caso: (u,v) == (v,u)
         if (pila.size() > 1) {
             int j = 0;
             for (Movimiento m : pila) {
@@ -180,9 +173,9 @@ public class PartialFeedbackEdgeSet {
                     } else {
                         v2 = listaAdy.get(m.verticeActual)[m.vMov - 1];
                     }
-                    System.out.println("(u1,v1): " + u1 + ", " + v1 + " (u2,v2): " + u2 + ", " + v2);
+                    //System.out.println("(u1,v1): " + u1 + ", " + v1 + " (u2,v2): " + u2 + ", " + v2);
                     if ((u1 == u2 && v1 == v2) || (u1 == v2 && v1 == u2)) {
-                        System.out.println("Se repite una arista.");
+                        //System.out.println("Se repite una arista.");
                         return false;
                     }
                 }
@@ -192,27 +185,72 @@ public class PartialFeedbackEdgeSet {
         return true;
     }
 
+    /* Verifica que los subgrafos encontrados tengan todas las aristas de todos los circuitos de longitud L */
+    public static ArrayList<Arista> verificarSubgrafo(ArrayList<ArrayList<Arista>> subgrafos, ArrayList<ArrayList<Arista>> circuitos) {
+        int numCircuitos = circuitos.size();
+        // Debo buscar un subgrafo que tenga por lo menos una arista de todos los circuitos
+        for (ArrayList<Arista> subgrafo : subgrafos) {
+            int cont = 0;
+            for (Arista a : subgrafo) {
+                for (ArrayList<Arista> circuito : circuitos) {
+                    for (Arista b : circuito) {
+                        // Comprueba que la arista del subgrafo sea igual a la del circuito
+                        if ((a.u == b.u && a.v == b.v) || (a.u == b.v && a.v == b.u)) {
+                            cont++;
+                            break;
+                        }
+                    }
+                }
+                // Se comprueba que tenga por lo menos una arista en todos los circuitos
+                if (cont == numCircuitos) return subgrafo;
+            }
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
-        System.out.println("Working on it...");
+
         ArrayList<int[]> grafo = new ArrayList<>();
 
-        int[] l0 = {1, 4};
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Digite K: ");
+        int K = sc.nextInt();
+        System.out.print("Digite L: ");
+        int L = sc.nextInt();
+
+        /*int[] l0 = {1, 4};
         int[] l1 = {0, 4, 3, 2};
         int[] l2 = {1, 3};
         int[] l3 = {1, 4, 2};
-        int[] l4 = {3, 0, 1};
+        int[] l4 = {3, 0, 1};*/
+        int[] l0 = {1, 3};
+        int[] l1 = {0, 2};
+        int[] l2 = {1, 3};
+        int[] l3 = {0, 2};
 
         grafo.add(l0);
         grafo.add(l1);
         grafo.add(l2);
         grafo.add(l3);
-        grafo.add(l4);
+        //grafo.add(l4);
 
         System.out.println("\nSubgrafos: ");
-        mostrarLista(buscarSubgrafos(grafo, 3));
+        ArrayList<ArrayList<Arista>> subgrafos = buscarSubgrafos(grafo, K);
+        mostrarLista(subgrafos);
         System.out.println("\nCircuitos: ");
-        buscarCircuitos(grafo, 4);
+        ArrayList<ArrayList<Arista>> circuitos = buscarCircuitos(grafo, L);
+        mostrarLista(circuitos);
         System.out.println("Done!");
+        ArrayList<Arista> subgrafo = verificarSubgrafo(subgrafos, circuitos);
+        if (subgrafo != null) {
+            System.out.println("Subconjunto encontrado: ");
+            for (Arista a : subgrafo) {
+                System.out.print("(" + a.u + "," + a.v + ") ");
+            }
+        } else {
+            System.out.println("No se encontro");
+        }
+        System.out.println("");
     }
 
 }
