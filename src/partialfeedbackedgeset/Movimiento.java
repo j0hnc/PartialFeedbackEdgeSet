@@ -6,12 +6,12 @@ package partialfeedbackedgeset;
  */
 public class Movimiento {
     
-    public int verticeActual, verticeSig;
-    public int vMov; // En que vertice de sus adyacentes se encuentra
+    public int verticeActual;
+    public int verticeSig;
+    public int vMov; // Arista: (verticeActual, vMov)
     
     public Movimiento(int verticeActual, int vMov) {
         this.verticeActual = verticeActual;
         this.vMov = vMov;
-        //verticeSig = ady[vMov];
     }
 }
